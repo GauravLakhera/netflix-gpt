@@ -1,15 +1,72 @@
 import React from "react";
 import Header from "./Header";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { validation } from "../utils/validate";
+import { auth } from "../utils/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true);
+  const [validationInfo, setvalidationInfo] = useState(null);
+  const navigate = useNavigate();
+
+  const email = useRef(null);
+  const passwowrd = useRef(null);
 
   const ToggleSign = () => {
     setIsSignIn(!isSignIn);
   };
 
-  console.log(isSignIn);
+  const checkValidation = () => {
+    const message = validation(
+      email.current.value, //this is trigger or contain the value inside the input box of email
+      passwowrd.current.value //this is trigger or contain the value inside the input box of password
+    );
+    setvalidationInfo(message);
+    if (message) return; //email and pass is not correct
+    //signin signup logic
+    if (!isSignIn) {
+      //sign up
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        passwowrd.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          navigate("/browse");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setvalidationInfo(errorCode + "-" + errorMessage);
+          // ..
+        });
+    } else {
+      //sign in
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        passwowrd.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          navigate("/browse");
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setvalidationInfo(errorCode + "-" + errorMessage);
+        });
+    }
+  };
 
   return (
     <>
@@ -22,10 +79,14 @@ const Login = () => {
           ></img>
         </div>
 
-        <form className="absolute bg-black rounded-md bg-opacity-75 my-16 flex flex-col left-0 right-0 p-10 w-11/12 md:w-3/12 md:p-16 mx-auto flex-wrap text-white ">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="absolute bg-black rounded-md bg-opacity-75 my-16 flex flex-col left-0 right-0 p-10 w-11/12 md:w-3/12 md:p-16 mx-auto flex-wrap text-white "
+        >
           <h1 className="font-bold text-3xl my-5">
             {isSignIn ? "Sign In" : "Sign Up"}
           </h1>
+          {/* if its not sign in then show extra input feild Name for sign up */}
           {!isSignIn && (
             <input
               type="text"
@@ -34,17 +95,22 @@ const Login = () => {
             />
           )}
           <input
+            ref={email}
             type="text"
             placeholder="Email Address"
             className="p-4 m-2 w-full bg-gray-700 bg-opacity-40 rounded-sm border"
           />
-
           <input
+            ref={passwowrd}
             type="password"
             placeholder="Password"
             className="p-4 m-2 w-full  bg-gray-700 bg-opacity-40 rounded-sm border"
           />
-          <button className=" p-2 m-2 w-full bg-red-700 rounded-sm hover:bg-red-600">
+          <p className="text-red-800">{validationInfo}</p>
+          <button
+            onClick={checkValidation}
+            className=" p-2 m-2 w-full bg-red-700 rounded-sm hover:bg-red-600"
+          >
             {isSignIn ? "Sign In" : "Sign Up"}
           </button>
           <h1 className="text-gray-400 hover:text-gray-300 cursor-pointer m-2">
