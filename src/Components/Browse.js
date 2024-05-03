@@ -1,10 +1,16 @@
 import React from "react";
 import Header from "./Header";
+import usePopulerMovies from "../hooks/usePopulerMovies";
+import MainContainer from "./MainContainer";
 
 function Browse() {
-  return <>
-<Header/>
-  </>
+  usePopulerMovies();
+  return (
+    <>
+      <Header />
+      <MainContainer />
+    </>
+  );
 }
 
 export default Browse;
