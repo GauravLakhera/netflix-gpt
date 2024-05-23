@@ -2,6 +2,7 @@ import React from "react";
 import Header from "./Header";
 import usePopulerMovies from "../hooks/usePopulerMovies";
 import MainContainer from "./MainContainer";
+import SecondContainer from "./SecondContainer";
 
 function Browse() {
   usePopulerMovies();
@@ -9,6 +10,7 @@ function Browse() {
     <>
       <Header />
       <MainContainer />
+      <SecondContainer />
     </>
   );
 }
